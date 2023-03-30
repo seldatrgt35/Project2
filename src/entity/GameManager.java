@@ -1,4 +1,4 @@
-package playy;
+package playy.src.entity;
 
 import enigma.core.Enigma;
 import enigma.event.TextMouseEvent;
@@ -7,6 +7,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import enigma.console.TextAttributes;
 import java.awt.Color;
+import java.util.Random;
 
 public class GameManager {
    public enigma.console.Console cn = Enigma.getConsole("Mouse and Keyboard",75,25);
@@ -21,7 +22,7 @@ public class GameManager {
    // ----------------------------------------------------
    
    
-   GameManager() throws Exception {   // --- Contructor
+   public GameManager() throws Exception {   // --- Contructor
                  
       // ------ Standard code for mouse and keyboard ------ Do not change
       tmlis=new TextMouseListener() {
@@ -92,18 +93,40 @@ public class GameManager {
     	   
            for (int j = 0; j < 25; j++){
                if (i == 0 || i==54 || j==0 || j==24) {
-            	   wholeGrid[i][ j] = '#';              // First row of the outer walls
+            	   wholeGrid[i][ j] = '#';
             	   cn.getTextWindow().output(i,j,'#');
                }
                else {
-            	   wholeGrid[i][ j] = ':';              // First row of the outer walls
+            	   wholeGrid[i][ j] = ':';
             	   cn.getTextWindow().output(i,j,':');
                }
-            	   
-             
+
+           }
+       }
+      Random rnd=new Random();
+      int counterForTreasure=0;
+      int maxTreasure=29;
+      int counterForEmptySquares=0;
+      int maxEmptySquares=199;
+
+      while(!(counterForTreasure==maxTreasure&&counterForEmptySquares==maxEmptySquares)){
+         int randomi= rnd.nextInt(55);
+         int randomj= rnd.nextInt(25);
+         if(wholeGrid[randomi][randomj]==':' && counterForTreasure<=maxTreasure){
+            //ASCII codes: 49=1_50=2_51=3
+            char randomTreasure= (char) (rnd.nextInt(52 - 49) + 49);
+            wholeGrid[randomi][randomj] =randomTreasure ;
+            cn.getTextWindow().output(randomi,randomj,randomTreasure);
+            counterForTreasure++;
          }
-     }
-       return wholeGrid;
+         else if(wholeGrid[randomi][randomj]==':' && counterForEmptySquares<=maxEmptySquares){
+            wholeGrid[randomi][randomj]=' ';
+            cn.getTextWindow().output(randomi,randomj,' ');
+            counterForEmptySquares++;
+         }
+      }
+
+      return wholeGrid;
    }
 }
 
