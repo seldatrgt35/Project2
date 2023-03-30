@@ -1,4 +1,4 @@
-package playy;
+package playy.src.entity;
 
 import java.util.Stack;
 

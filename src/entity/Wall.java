@@ -1,12 +1,12 @@
-package playy;
+package playy.src.entity;
 
-public class Robot {
+public class Wall {
 	private char symbol='X';
 	private boolean live;
-	public Robot (){
+	public Wall (){
 		
 	}
-	public Robot( boolean live) {
+	public Wall ( boolean live) {
 		
 		this.live = live;
 	}
@@ -19,7 +19,6 @@ public class Robot {
 	public void setLive(boolean live) {
 		this.live = live;
 	}
-	
 	
 
 }

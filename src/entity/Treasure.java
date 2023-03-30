@@ -1,4 +1,4 @@
-package playy;
+package playy.src.entity;
 
 public class Treasure {
 	private int number ;

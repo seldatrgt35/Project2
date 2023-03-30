@@ -1,12 +1,12 @@
-package playy;
+package playy.src.entity;
 
-public class Wall {
-	private char symbol='X';
+public class Boulder {
+	private char symbol='O';
 	private boolean live;
-	public Wall (){
+	public Boulder (){
 		
 	}
-	public Wall ( boolean live) {
+	public Boulder ( boolean live) {
 		
 		this.live = live;
 	}
@@ -20,5 +20,4 @@ public class Wall {
 		this.live = live;
 	}
 	
-
 }
