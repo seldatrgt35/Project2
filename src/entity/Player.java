@@ -1,4 +1,4 @@
-package playy.src.entity;
+package gravity.src.entity;
 
 import java.util.Stack;
 

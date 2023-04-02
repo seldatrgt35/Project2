@@ -1,4 +1,4 @@
-package playy.src.entity;
+package gravity.src.entity;
 
 public class Robot {
     private char symbol = 'X';

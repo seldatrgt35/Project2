@@ -1,4 +1,4 @@
-package playy.src;
+package gravity.src;
 
 public class Gravity {
     public static void main(String[] args) throws Exception {

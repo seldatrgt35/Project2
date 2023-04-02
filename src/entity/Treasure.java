@@ -1,4 +1,4 @@
-package playy.src.entity;
+package gravity.src.entity;
 
 public class Treasure {
     private int number;
