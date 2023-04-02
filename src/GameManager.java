@@ -156,9 +156,9 @@ public class GameManager {
         }
         //TODO: we need to extract this functionality to initializeBoulders() method
 //	      Convert boulders 
-        int maxconvertBoulder = 179;
+        int maxconvertBoulder = 179;    //TODO: Do not use magic numbers, initialize them as constants. Also this one should be 200, change statement accordingly.
         int counterb = 0;
-        while (!(counterb == maxconvertBoulder)) {
+        while (!(counterb == maxconvertBoulder)) {  //TODO !(x == y) is not correct, use x != y instead
             int x = rnd.nextInt(GAME_FIELD_X);
             int y = rnd.nextInt(GAME_FIELD_Y);
             if (wholeGrid[x][y] == ':' && counterb <= maxconvertBoulder) {
@@ -172,11 +172,11 @@ public class GameManager {
         int counterForTreasure = 0;
         int maxTreasure = 29;
         int counterForEmptySquares = 0;
-        int maxEmptySquares = 199;
+        int maxEmptySquares = 199;  //TODO: Do not use magic numbers, initialize them as constants. Also this one should be 200, change statement accordingly.
 
         //TODO: we need to extract this functionality to initializeTreasures() method
         //TODO: infinite loop
-//        while (!(counterForTreasure == maxTreasure && counterForEmptySquares == maxEmptySquares)) {
+//        while (!(counterForTreasure == maxTreasure && counterForEmptySquares == maxEmptySquares)) {   //TODO !(x == y) is not correct, use x != y instead
 //            int randomi = rnd.nextInt(55);
 //            int randomj = rnd.nextInt(25);
 //            if (wholeGrid[randomi][randomj] == ':' && counterForTreasure <= maxTreasure) {
