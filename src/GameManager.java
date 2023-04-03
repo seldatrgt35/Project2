@@ -16,6 +16,9 @@ public class GameManager {
     public static final int ROBOT_COUNT = 7;
     public static final int GAME_FIELD_X = 55;
     public static final int GAME_FIELD_Y = 25;
+    public static final int TREASURE_COUNT = 30;
+    public static final int EMPTY_SQUARE_COUNT = 200;
+
     public static final TextAttributes PLAYER_COLOR = new TextAttributes(GREEN, BLACK);
     public static final TextAttributes ROBOT_COLOR = new TextAttributes(YELLOW, BLACK);
     public static final TextAttributes WALL_COLOR = new TextAttributes(WHITE, BLACK);
@@ -127,11 +130,13 @@ public class GameManager {
         setMenu();
         doNotChange();
         //1.	Walls are placed.
+        initializeWallAndEarth();
         //2.	All empty squares are converted into earth squares.
         //3.	Random 180 earth squares are converted into boulders.
         //4.	Random 30 earth squares are converted into treasures (Random 1, 2 or 3 with equal probability).
+        initializeTreasures();
         //5.	Random 200 earth squares are converted into empty squares.
-        initializeWallAndEarth();
+        initializeEmptySquares();
         //6.	Random 7 earth squares are converted into robots.
         initializeRobots();
         //7.	Player P is placed on a random earth square.
@@ -188,8 +193,14 @@ public class GameManager {
                         case 'P':
                             cn.getTextWindow().output(i, j, 'P', PLAYER_COLOR);
                             break;
-                        case 'T':
-                            cn.getTextWindow().output(i, j, 'T', TREASURE_COLOR);
+                        case '1':
+                            cn.getTextWindow().output(i, j, '1', TREASURE_COLOR);
+                            break;
+                        case '2':
+                            cn.getTextWindow().output(i, j, '2', TREASURE_COLOR);
+                            break;
+                        case '3':
+                            cn.getTextWindow().output(i, j, '3', TREASURE_COLOR);
                             break;
                         case 'O':
                             cn.getTextWindow().output(i, j, 'O', BOULDER_COLOR);
@@ -209,6 +220,29 @@ public class GameManager {
             Thread.sleep(20);
         }
     }
+
+    private void initializeTreasures() {
+        for(int i = 0; i < TREASURE_COUNT; i++){
+            while (wholeGrid[px][py] != ':') {
+                px = rnd.nextInt(GAME_FIELD_X);
+                py = rnd.nextInt(GAME_FIELD_Y);
+            }
+            //ASCII codes: 49=1_50=2_51=3
+            char randomTreasure = (char) (rnd.nextInt(52 - 49) + 49);
+            wholeGrid[px][py] = randomTreasure;
+        }
+    }
+
+    private void initializeEmptySquares(){
+        for(int i = 0; i < EMPTY_SQUARE_COUNT; i++){
+            while (wholeGrid[px][py] != ':') {
+                px = rnd.nextInt(GAME_FIELD_X);
+                py = rnd.nextInt(GAME_FIELD_Y);
+            }
+            wholeGrid[px][py] =' ';
+        }
+    }
+
 
     private void initializeRobots() {
         for (int i = 0; i < ROBOT_COUNT; i++) {
@@ -254,27 +288,6 @@ public class GameManager {
                 counterb++;
             }
         }
-        int counterForTreasure = 0;
-        int maxTreasure = 29;
-        int counterForEmptySquares = 0;
-        int maxEmptySquares = 199;  //TODO: Do not use magic numbers, initialize them as constants. Also this one should be 200, change statement accordingly.
-
-        //TODO: we need to extract this functionality to initializeTreasures() method
-        //TODO: infinite loop
-//        while (!(counterForTreasure == maxTreasure && counterForEmptySquares == maxEmptySquares)) {   //TODO !(x == y) is not correct, use x != y instead
-//            int randomi = rnd.nextInt(55);
-//            int randomj = rnd.nextInt(25);
-//            if (wholeGrid[randomi][randomj] == ':' && counterForTreasure <= maxTreasure) {
-//                //ASCII codes: 49=1_50=2_51=3
-//                char randomTreasure = (char) (rnd.nextInt(52 - 49) + 49);
-//                wholeGrid[randomi][randomj] = randomTreasure;
-//                counterForTreasure++;
-//            } else if (wholeGrid[randomi][randomj] == ':' && counterForEmptySquares <= maxEmptySquares) {
-//                wholeGrid[randomi][randomj] = ' ';
-//                counterForEmptySquares++;
-//            }
-//        }
-
         return wholeGrid;
     }
 }
