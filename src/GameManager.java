@@ -15,7 +15,6 @@ public class GameManager {
     public static final int ROBOT_COUNT = 7;
     public static final int GAME_FIELD_X = 55;
     public static final int GAME_FIELD_Y = 25;
-
     public static final TextAttributes PLAYER_COLOR = new TextAttributes(GREEN, BLACK);
     public static final TextAttributes ROBOT_COLOR = new TextAttributes(YELLOW, BLACK);
     public static final TextAttributes WALL_COLOR = new TextAttributes(WHITE, BLACK);
@@ -23,20 +22,44 @@ public class GameManager {
     public static final TextAttributes BOULDER_COLOR = new TextAttributes(BLACK, WHITE);
     public static final TextAttributes TREASURE_COLOR = new TextAttributes(RED, WHITE);
     public static final TextAttributes CONSOLE_COLOR = new TextAttributes(BLACK, WHITE);
+    public static final TextAttributes TEXT_COLOR = new TextAttributes(BLACK, WHITE);
+
     Random rnd = new Random();
     public int px, py; // player x,y position
     char[][] wholeGrid = new char[GAME_FIELD_X][GAME_FIELD_Y];
 
-    private static final enigma.console.Console cn;
+    private static enigma.console.Console cn;
 
-    static {
-        cn = Enigma.getConsole("Gravity - Team7", 75, GAME_FIELD_Y);
-        cn.setTextAttributes(CONSOLE_COLOR);
-        for (int i = 0; i < cn.getTextWindow().getColumns(); i++) {
-            for (int j = 0; j < cn.getTextWindow().getRows(); j++) {
-                cn.getTextWindow().output(i, j, ' ', CONSOLE_COLOR);
-            }
+
+    private static void setMenu() {
+        //Input
+        cn.getTextWindow().setCursorPosition(56, 0);
+        cn.getTextWindow().output("Input", TEXT_COLOR);
+        cn.getTextWindow().setCursorPosition(56, 1);
+        cn.getTextWindow().output("<<<<<<<<<<<<<<<", WALL_COLOR);
+        cn.getTextWindow().setCursorPosition(56, 3);
+        cn.getTextWindow().output("<<<<<<<<<<<<<<<", WALL_COLOR);
+
+        //Backpack
+        for (int i = 6; i <= 13; i++) {
+            cn.getTextWindow().output(62, i, '|', TEXT_COLOR);
+            cn.getTextWindow().output(66, i, '|', TEXT_COLOR);
         }
+        cn.getTextWindow().output(62, 14, '+', TEXT_COLOR);
+        cn.getTextWindow().output(63, 14, '-', TEXT_COLOR);
+        cn.getTextWindow().output(64, 14, '-', TEXT_COLOR);
+        cn.getTextWindow().output(65, 14, '-', TEXT_COLOR);
+        cn.getTextWindow().output(66, 14, '+', TEXT_COLOR);
+        cn.getTextWindow().setCursorPosition(61, 15);
+        cn.getTextWindow().output("Backpack", TEXT_COLOR);
+
+        //Teleport, Score, Time
+        cn.getTextWindow().setCursorPosition(56, 18);
+        cn.getTextWindow().output("Teleport :", TEXT_COLOR);
+        cn.getTextWindow().setCursorPosition(56, 20);
+        cn.getTextWindow().output("Score    :", TEXT_COLOR);
+        cn.getTextWindow().setCursorPosition(56, 22);
+        cn.getTextWindow().output("Time     :", TEXT_COLOR);
     }
 
     public TextMouseListener tmlis;
@@ -88,7 +111,16 @@ public class GameManager {
     }
 
     public GameManager() throws Exception { // --- Contructor
+        cn = Enigma.getConsole("Gravity - Team7", 75, GAME_FIELD_Y);
 
+        //set console background color to white
+        for (int i = 0; i < cn.getTextWindow().getColumns(); i++) {
+            for (int j = 0; j < cn.getTextWindow().getRows(); j++) {
+                cn.getTextWindow().output(i, j, ' ', CONSOLE_COLOR);
+            }
+        }
+
+        setMenu();
         doNotChange();
         //1.	Walls are placed.
         //2.	All empty squares are converted into earth squares.
