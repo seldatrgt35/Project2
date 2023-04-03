@@ -115,7 +115,7 @@ public class GameManager {
     public GameManager() throws Exception { // --- Contructor
         //set enigma font to bold
 //        Enigma.getEnvironment().setProperty("enigma.console.font", "Courier New-bold-12");
-        cn = Enigma.getConsole("Gravity - Team7", 75, GAME_FIELD_Y);
+        cn = Enigma.getConsole("Gravity - Team7", 75, GAME_FIELD_Y, 20, BOLD);
 
         //set console background color to white
         for (int i = 0; i < cn.getTextWindow().getColumns(); i++) {
