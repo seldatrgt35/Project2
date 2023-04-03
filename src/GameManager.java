@@ -25,7 +25,8 @@ public class GameManager {
     public static final TextAttributes TEXT_COLOR = new TextAttributes(BLACK, WHITE);
 
     Random rnd = new Random();
-    public int px, py; // player x,y position
+    public int px, py, pxOld, pyOld; // player x,y position
+    public boolean moved;
     char[][] wholeGrid = new char[GAME_FIELD_X][GAME_FIELD_Y];
 
     private static enigma.console.Console cn;
@@ -133,7 +134,11 @@ public class GameManager {
         //7.	Player P is placed on a random earth square.
         initializePlayer();
 
+
         while (true) {
+            pxOld = px;
+            pyOld = py;
+            moved = false;
 //            if (mousepr == 1) { // if mouse button pressed
 //                cn.getTextWindow().output(mousex, mousey, '#',WALL_COLOR); // write a char to x,y position without changing cursor
 //                // position
@@ -143,21 +148,24 @@ public class GameManager {
 //                mousepr = 0; // last action
 //            }
             if (keypr == 1) { // if keyboard button pressed
-                if (rkey == KeyEvent.VK_LEFT)
+                if (rkey == KeyEvent.VK_LEFT && px > 1) {
                     px--;
-                if (rkey == KeyEvent.VK_RIGHT)
+                    moved = true;
+                } else if (rkey == KeyEvent.VK_RIGHT && px < GAME_FIELD_X - 2) {
                     px++;
-                if (rkey == KeyEvent.VK_UP)
+                    moved = true;
+                } else if (rkey == KeyEvent.VK_UP && py > 1) {
                     py--;
-                if (rkey == KeyEvent.VK_DOWN)
+                    moved = true;
+                } else if (rkey == KeyEvent.VK_DOWN && py < GAME_FIELD_Y - 2) {
                     py++;
+                    moved = true;
+                }
 
-                char rckey = (char) rkey;
-                // left right up down
-                if (rckey == '%' || rckey == '\'' || rckey == '&' || rckey == '(')
-                    cn.getTextWindow().output(px, py, 'P', PLAYER_COLOR); // VK kullanmadan test teknigi
-                else
-                    cn.getTextWindow().output(rckey);
+                if (moved) {
+                    wholeGrid[px][py] = 'P';    // VK kullanmadan test teknigi
+                    wholeGrid[pxOld][pyOld] = ' ';
+                }
 
 //                if (rkey == KeyEvent.VK_SPACE) {
 //                    String str;
@@ -166,6 +174,34 @@ public class GameManager {
 //                    cn.getTextWindow().output(str);
 //                }
                 keypr = 0; // last action
+            }
+            //Print game field according to wholeGrid array with colors
+            for (int i = 0; i < GAME_FIELD_X; i++) {
+                for (int j = 0; j < GAME_FIELD_Y; j++) {
+                    switch (wholeGrid[i][j]) {
+                        case 'X':
+                            cn.getTextWindow().output(i, j, 'X', ROBOT_COLOR);
+                            break;
+                        case 'P':
+                            cn.getTextWindow().output(i, j, 'P', PLAYER_COLOR);
+                            break;
+                        case 'T':
+                            cn.getTextWindow().output(i, j, 'T', TREASURE_COLOR);
+                            break;
+                        case 'O':
+                            cn.getTextWindow().output(i, j, 'O', BOULDER_COLOR);
+                            break;
+                        case ':':
+                            cn.getTextWindow().output(i, j, ':', EARTH_COLOR);
+                            break;
+                        case '#':
+                            cn.getTextWindow().output(i, j, '#', WALL_COLOR);
+                            break;
+                        default:
+                            cn.getTextWindow().output(i, j, ' ', CONSOLE_COLOR);
+                            break;
+                    }
+                }
             }
             Thread.sleep(20);
         }
@@ -178,7 +214,6 @@ public class GameManager {
                 py = rnd.nextInt(GAME_FIELD_Y);
             }
             wholeGrid[px][py] = 'X';
-            cn.getTextWindow().output(px, py, 'X', ROBOT_COLOR);
         }
     }
 
@@ -188,7 +223,6 @@ public class GameManager {
             py = rnd.nextInt(GAME_FIELD_Y);
         }
         wholeGrid[px][py] = 'P';
-        cn.getTextWindow().output(px, py, 'P', PLAYER_COLOR);
     }
 
 
@@ -197,10 +231,8 @@ public class GameManager {
             for (int j = 0; j < GAME_FIELD_Y; j++) {
                 if (i == 0 || i == 54 || j == 0 || j == 24) {
                     wholeGrid[i][j] = '#'; // First row of the outer walls
-                    cn.getTextWindow().output(i, j, '#', WALL_COLOR);
                 } else {
                     wholeGrid[i][j] = ':'; // First row of the outer walls
-                    cn.getTextWindow().output(i, j, ':', EARTH_COLOR);
                 }
 
             }
@@ -216,7 +248,6 @@ public class GameManager {
                 wholeGrid[x][y] = ' ';
                 char boulds = 'O';
                 wholeGrid[x][y] = boulds;
-                cn.getTextWindow().output(x, y, boulds, BOULDER_COLOR);
                 counterb++;
             }
         }
@@ -234,11 +265,9 @@ public class GameManager {
 //                //ASCII codes: 49=1_50=2_51=3
 //                char randomTreasure = (char) (rnd.nextInt(52 - 49) + 49);
 //                wholeGrid[randomi][randomj] = randomTreasure;
-//                cn.getTextWindow().output(randomi, randomj, randomTreasure, TREASURE_COLOR);
 //                counterForTreasure++;
 //            } else if (wholeGrid[randomi][randomj] == ':' && counterForEmptySquares <= maxEmptySquares) {
 //                wholeGrid[randomi][randomj] = ' ';
-//                cn.getTextWindow().output(randomi, randomj, ' ');
 //                counterForEmptySquares++;
 //            }
 //        }
