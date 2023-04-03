@@ -10,6 +10,7 @@ import java.awt.event.KeyListener;
 import java.util.Random;
 
 import static java.awt.Color.*;
+import static java.awt.Font.BOLD;
 
 public class GameManager {
     public static final int ROBOT_COUNT = 7;
@@ -112,6 +113,8 @@ public class GameManager {
     }
 
     public GameManager() throws Exception { // --- Contructor
+        //set enigma font to bold
+//        Enigma.getEnvironment().setProperty("enigma.console.font", "Courier New-bold-12");
         cn = Enigma.getConsole("Gravity - Team7", 75, GAME_FIELD_Y);
 
         //set console background color to white
