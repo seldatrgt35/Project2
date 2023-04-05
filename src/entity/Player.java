@@ -1,6 +1,6 @@
 package gravity.src.entity;
 
-import java.util.Stack;
+import java.util.Stack;//TODO: implement your Stack.java
 
 public class Player {
     private int score;
@@ -9,12 +9,9 @@ public class Player {
 
 
     public Player() {
-
-
     }
 
     public Player(int score, Stack backPack, int teleportRight) {
-
         this.score = score;
         this.backPack = backPack;
         this.teleportRight = teleportRight;
