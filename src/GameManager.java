@@ -1,6 +1,5 @@
 package gravity.src;
 
-import enigma.console.TextAttributes;
 import enigma.core.Enigma;
 import enigma.event.TextMouseEvent;
 import enigma.event.TextMouseListener;
@@ -11,31 +10,10 @@ import java.awt.event.KeyListener;
 import java.util.Random;
 import java.util.Stack;
 
-import static java.awt.Color.*;
+import static gravity.src.Constant.*;
 import static java.awt.Font.BOLD;
 
 public class GameManager {
-    private static final int ROBOT_COUNT = 7;
-    private static final int GAME_FIELD_X = 55;
-    private static final int GAME_FIELD_Y = 25;
-    private static final int TREASURE_COUNT = 30;
-    private static final int EMPTY_SQUARE_COUNT = 200;
-    private static final int FPS = 10;
-
-    public static final TextAttributes PLAYER_COLOR = new TextAttributes(GREEN, BLACK);
-    public static final TextAttributes ROBOT_COLOR = new TextAttributes(YELLOW, BLACK);
-    public static final TextAttributes WALL_COLOR = new TextAttributes(WHITE, BLACK);
-    public static final TextAttributes EARTH_COLOR = new TextAttributes(BLACK, WHITE);
-    public static final TextAttributes BOULDER_COLOR = new TextAttributes(BLACK, WHITE);
-    public static final TextAttributes TREASURE_COLOR = new TextAttributes(RED, WHITE);
-    public static final TextAttributes CONSOLE_COLOR = new TextAttributes(BLACK, WHITE);
-    public static final TextAttributes TEXT_COLOR = new TextAttributes(BLACK, WHITE);
-    public static final char BOULDER = 'O';
-    public static final char WALL = '#';
-    public static final char EARTH = ':';
-    public static final char PLAYER = 'P';
-    public static final char ROBOT = 'X';
-    public static final char EMPTY = ' ';
 
     Random rnd = new Random();
     public int px, py, pxOld, pyOld; // player x,y position
