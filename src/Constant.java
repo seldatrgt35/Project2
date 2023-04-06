@@ -11,6 +11,8 @@ public class Constant {
     public static final int TREASURE_COUNT = 30;
     public static final int EMPTY_SQUARE_COUNT = 200;
     public static final int FPS = 10;
+    public static final int BACKPACK_SIZE = 8;
+    public static final int STACK_SIZE = 8;
     public static final TextAttributes PLAYER_COLOR = new TextAttributes(GREEN, BLACK);
     public static final TextAttributes ROBOT_COLOR = new TextAttributes(YELLOW, BLACK);
     public static final TextAttributes WALL_COLOR = new TextAttributes(WHITE, BLACK);

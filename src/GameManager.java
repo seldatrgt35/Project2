@@ -1,21 +1,17 @@
 package gravity.src;
 
-import enigma.console.TextAttributes;
 import enigma.core.Enigma;
 import enigma.event.TextMouseEvent;
 import enigma.event.TextMouseListener;
 import gravity.src.entity.Player;
 import gravity.src.entity.Stack;
-import org.w3c.dom.ls.LSOutput;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.Random;
-import java.util.Stack;
 
-import static java.awt.Color.*;
-import static java.awt.Font.BOLD;
 import static gravity.src.Constant.*;
+import static java.awt.Font.BOLD;
 
 public class GameManager {
 
@@ -26,9 +22,8 @@ public class GameManager {
 
     Stack backpack=new Stack(BACKPACK_SIZE);
 
-
     private static int time = 0;
-    private static final Player player = new Player(0, new Stack(), 3);
+    private static final Player player = new Player(0, new Stack(STACK_SIZE), 3);
 
     private static enigma.console.Console cn;
 
