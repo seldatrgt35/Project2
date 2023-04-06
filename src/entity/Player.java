@@ -1,6 +1,5 @@
 package gravity.src.entity;
 
-import java.util.Stack;//TODO: implement your Stack.java
 
 public class Player {
     private int score;
@@ -40,6 +39,7 @@ public class Player {
     public void setTeleportRight(int teleportRight) {
         this.teleportRight = teleportRight;
     }
+
 
 
 }

@@ -4,11 +4,11 @@ import enigma.core.Enigma;
 import enigma.event.TextMouseEvent;
 import enigma.event.TextMouseListener;
 import gravity.src.entity.Player;
+import gravity.src.entity.Stack;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.Random;
-import java.util.Stack;
 
 import static gravity.src.Constant.*;
 import static java.awt.Font.BOLD;
@@ -20,8 +20,10 @@ public class GameManager {
     public boolean gameOver = false;
     char[][] wholeGrid = new char[GAME_FIELD_X][GAME_FIELD_Y];
 
+    Stack backpack=new Stack(BACKPACK_SIZE);
+
     private static int time = 0;
-    private static final Player player = new Player(0, new Stack(), 3);
+    private static final Player player = new Player(0, new Stack(STACK_SIZE), 3);
 
     private static enigma.console.Console cn;
 
@@ -226,6 +228,7 @@ public class GameManager {
     }
 
     private void movePlayer(int px, int py) {
+        backpackImplementation(wholeGrid,backpack,player);
         wholeGrid[px][py] = PLAYER;    // VK kullanmadan test teknigi
         wholeGrid[pxOld][pyOld] = EMPTY;
     }
@@ -353,6 +356,68 @@ public class GameManager {
         wholeGrid[px][py] = PLAYER;
     }
 
+    private void backpackImplementation(char wholeGrid[][],Stack backPack,Player player){
+        keepTrackOfScoreAndTeleportRight(player);
+        if(wholeGrid[px][py]==49||wholeGrid[px][py]==50||wholeGrid[px][py]==51){
+            if(backPack.isFull()){
+                backPack.pop();
+                backPack.push(wholeGrid[px][py]);
+            }else{
+                backPack.push(wholeGrid[px][py]);
+            }
+            printBackpackElementsOnMenu(backpack);
+        }
+    }
+
+    private void keepTrackOfScoreAndTeleportRight(Player player){
+        if(backpack.size()>1){
+            char checkTreasue= (char) backpack.pop();
+            if(checkTreasue==(char) backpack.peek()){
+                backpack.pop();
+
+                int score= player.getScore();
+                int teleportRight= player.getTeleportRight();
+                if(checkTreasue==49){
+                    score+=10;
+                } else if (checkTreasue==50) {
+                    score+=40;
+                }else {
+                    score+=90;
+                    teleportRight+=1;
+                }
+                player.setScore(score);
+                player.setTeleportRight(teleportRight);
+
+                int a= backpack.size();
+                String scoreString= String.valueOf(score);
+                String teleportRightString= String.valueOf(teleportRight);
+                cn.getTextWindow().output(64, 12-a, ' ', TEXT_COLOR);
+                cn.getTextWindow().output(64, 13-a, ' ', TEXT_COLOR);
+                cn.getTextWindow().setCursorPosition(66, 20);
+                cn.getTextWindow().output(scoreString,TEXT_COLOR);
+                cn.getTextWindow().setCursorPosition(66, 18);
+                cn.getTextWindow().output(teleportRightString,TEXT_COLOR);
+            }else {
+                backpack.push(checkTreasue);
+            }
+
+        }
+    }
+
+    private void printBackpackElementsOnMenu(Stack backpack){
+        Stack tempStack=new Stack(8);
+        while(!backpack.isEmpty()){
+            tempStack.push(backpack.pop());
+        }
+        int count=0;
+        while(!tempStack.isEmpty()){
+            char paste= (char) tempStack.peek();
+            cn.getTextWindow().output(64, 13-count, paste, TEXT_COLOR);
+            count++;
+            backpack.push(tempStack.pop());
+        }
+    }
+
     public char[][] initializeWallAndEarth() {
         for (int i = 0; i < GAME_FIELD_X; i++) {
             for (int j = 0; j < GAME_FIELD_Y; j++) {
@@ -379,4 +444,5 @@ public class GameManager {
         }
         return wholeGrid;
     }
+
 }
