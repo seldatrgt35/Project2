@@ -23,8 +23,10 @@
 hs_err_pid*
 replay_pid*
 
+out/
+
 # intellij
-.idea/
+.idea
 *.iml
 *.ipr
 *.iws

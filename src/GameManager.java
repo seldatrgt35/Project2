@@ -11,68 +11,26 @@ import org.w3c.dom.ls.LSOutput;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.Random;
+import java.util.Stack;
 
 import static java.awt.Color.*;
 import static java.awt.Font.BOLD;
+import static gravity.src.Constant.*;
 
 public class GameManager {
-    public static final int ROBOT_COUNT = 7;
-    public static final int GAME_FIELD_X = 55;
-    public static final int GAME_FIELD_Y = 25;
-    public static final int TREASURE_COUNT = 30;
-    public static final int EMPTY_SQUARE_COUNT = 200;
-    public static final int BACKPACK_SIZE = 8;
-
-    public static final TextAttributes PLAYER_COLOR = new TextAttributes(GREEN, BLACK);
-    public static final TextAttributes ROBOT_COLOR = new TextAttributes(YELLOW, BLACK);
-    public static final TextAttributes WALL_COLOR = new TextAttributes(WHITE, BLACK);
-    public static final TextAttributes EARTH_COLOR = new TextAttributes(BLACK, WHITE);
-    public static final TextAttributes BOULDER_COLOR = new TextAttributes(BLACK, WHITE);
-    public static final TextAttributes TREASURE_COLOR = new TextAttributes(RED, WHITE);
-    public static final TextAttributes CONSOLE_COLOR = new TextAttributes(BLACK, WHITE);
-    public static final TextAttributes TEXT_COLOR = new TextAttributes(BLACK, WHITE);
 
     Random rnd = new Random();
     public int px, py, pxOld, pyOld; // player x,y position
-    public boolean moved;
+    public boolean gameOver = false;
     char[][] wholeGrid = new char[GAME_FIELD_X][GAME_FIELD_Y];
-    Player player=new Player();
+
     Stack backpack=new Stack(BACKPACK_SIZE);
 
 
+    private static int time = 0;
+    private static final Player player = new Player(0, new Stack(), 3);
+
     private static enigma.console.Console cn;
-
-
-    private static void setMenu() {
-        //Input
-        cn.getTextWindow().setCursorPosition(56, 0);
-        cn.getTextWindow().output("Input", TEXT_COLOR);
-        cn.getTextWindow().setCursorPosition(56, 1);
-        cn.getTextWindow().output("<<<<<<<<<<<<<<<", WALL_COLOR);
-        cn.getTextWindow().setCursorPosition(56, 3);
-        cn.getTextWindow().output("<<<<<<<<<<<<<<<", WALL_COLOR);
-
-        //Backpack
-        for (int i = 6; i <= 13; i++) {
-            cn.getTextWindow().output(62, i, '|', TEXT_COLOR);
-            cn.getTextWindow().output(66, i, '|', TEXT_COLOR);
-        }
-        cn.getTextWindow().output(62, 14, '+', TEXT_COLOR);
-        cn.getTextWindow().output(63, 14, '-', TEXT_COLOR);
-        cn.getTextWindow().output(64, 14, '-', TEXT_COLOR);
-        cn.getTextWindow().output(65, 14, '-', TEXT_COLOR);
-        cn.getTextWindow().output(66, 14, '+', TEXT_COLOR);
-        cn.getTextWindow().setCursorPosition(61, 15);
-        cn.getTextWindow().output("Backpack", TEXT_COLOR);
-
-        //Teleport, Score, Time
-        cn.getTextWindow().setCursorPosition(56, 18);
-        cn.getTextWindow().output("Teleport :", TEXT_COLOR);
-        cn.getTextWindow().setCursorPosition(56, 20);
-        cn.getTextWindow().output("Score    :", TEXT_COLOR);
-        cn.getTextWindow().setCursorPosition(56, 22);
-        cn.getTextWindow().output("Time     :", TEXT_COLOR);
-    }
 
     public TextMouseListener tmlis;
     public KeyListener klis;
@@ -123,14 +81,12 @@ public class GameManager {
     }
 
     public GameManager() throws Exception { // --- Contructor
-        //set enigma font to bold
-//        Enigma.getEnvironment().setProperty("enigma.console.font", "Courier New-bold-12");
         cn = Enigma.getConsole("Gravity - Team7", 75, GAME_FIELD_Y, 20, BOLD);
 
         //set console background color to white
         for (int i = 0; i < cn.getTextWindow().getColumns(); i++) {
             for (int j = 0; j < cn.getTextWindow().getRows(); j++) {
-                cn.getTextWindow().output(i, j, ' ', CONSOLE_COLOR);
+                cn.getTextWindow().output(i, j, EMPTY, CONSOLE_COLOR);
             }
         }
 
@@ -149,91 +105,225 @@ public class GameManager {
         //7.	Player P is placed on a random earth square.
         initializePlayer();
 
-
-
-        while (true) {
+        int i = 0;
+        while (!gameOver) {
+            i++;
             pxOld = px;
             pyOld = py;
-            moved = false;
-//            if (mousepr == 1) { // if mouse button pressed
-//                cn.getTextWindow().output(mousex, mousey, '#',WALL_COLOR); // write a char to x,y position without changing cursor
-//                // position
-//                px = mousex;
-//                py = mousey;
-//
-//                mousepr = 0; // last action
-//            }
+            gameOver = false;
             if (keypr == 1) { // if keyboard button pressed
-                if (rkey == KeyEvent.VK_LEFT && px > 1) {
-                    px--;
-                    moved = true;
-                } else if (rkey == KeyEvent.VK_RIGHT && px < GAME_FIELD_X - 2) {
-                    px++;
-                    moved = true;
-                } else if (rkey == KeyEvent.VK_UP && py > 1) {
-                    py--;
-                    moved = true;
-                } else if (rkey == KeyEvent.VK_DOWN && py < GAME_FIELD_Y - 2) {
-                    py++;
-                    moved = true;
-                }
-
-                if (moved) {
-                    backpackImplementation(wholeGrid,backpack,player);
-
-                    wholeGrid[px][py] = 'P';    // VK kullanmadan test teknigi
-                    wholeGrid[pxOld][pyOld] = ' ';
-                }
-
-//                if (rkey == KeyEvent.VK_SPACE) {
-//                    String str;
-//                    str = cn.readLine(); // keyboardlistener running and readline input by using enter
-//                    cn.getTextWindow().setCursorPosition(5, 20);
-//                    cn.getTextWindow().output(str);
-//                }
+                handleKey(rkey);
                 keypr = 0; // last action
             }
             //Print game field according to wholeGrid array with colors
-            for (int i = 0; i < GAME_FIELD_X; i++) {
-                for (int j = 0; j < GAME_FIELD_Y; j++) {
-                    switch (wholeGrid[i][j]) {
-                        case 'X':
-                            cn.getTextWindow().output(i, j, 'X', ROBOT_COLOR);
-                            break;
-                        case 'P':
-                            cn.getTextWindow().output(i, j, 'P', PLAYER_COLOR);
-                            break;
-                        case '1':
-                            cn.getTextWindow().output(i, j, '1', TREASURE_COLOR);
-                            break;
-                        case '2':
-                            cn.getTextWindow().output(i, j, '2', TREASURE_COLOR);
-                            break;
-                        case '3':
-                            cn.getTextWindow().output(i, j, '3', TREASURE_COLOR);
-                            break;
-                        case 'O':
-                            cn.getTextWindow().output(i, j, 'O', BOULDER_COLOR);
-                            break;
-                        case ':':
-                            cn.getTextWindow().output(i, j, ':', EARTH_COLOR);
-                            break;
-                        case '#':
-                            cn.getTextWindow().output(i, j, '#', WALL_COLOR);
-                            break;
-                        default:
-                            cn.getTextWindow().output(i, j, ' ', CONSOLE_COLOR);
-                            break;
-                    }
-                }
+            colorfulPrintGameBoard();
+
+            Thread.sleep(1000 / FPS);
+            if (i % FPS == 0) {
+                cn.getTextWindow().setCursorPosition(72 - String.valueOf(++time).length(), 22);
+                cn.getTextWindow().output(String.valueOf(time), TEXT_COLOR);
             }
-            Thread.sleep(20);
         }
     }
 
+    private void handleKey(int rkey) {
+        if (rkey == KeyEvent.VK_LEFT && px > 1) {
+            switch (wholeGrid[px - 1][py]) {
+                case WALL:
+                    break;
+                case EARTH:
+                case EMPTY:
+                    movePlayer(--px, py);
+                    break;
+                case ROBOT:
+                    gameOver = true;
+                    break;
+                case BOULDER:
+                    if (wholeGrid[px - 2][py] == EMPTY) {
+                        wholeGrid[px - 2][py] = BOULDER;
+                        movePlayer(--px, py);
+                    }
+                    break;
+                case '1':
+                case '2':
+                case '3':
+                    movePlayer(--px, py);
+                    addTheTreasure(wholeGrid[px - 1][py]);
+                    break;
+            }
+        } else if (rkey == KeyEvent.VK_RIGHT && px < GAME_FIELD_X - 2) {
+            switch (wholeGrid[px + 1][py]) {
+                case WALL:
+                    break;
+                case EARTH:
+                case EMPTY:
+                    movePlayer(++px, py);
+                    break;
+                case ROBOT:
+                    gameOver = true;
+                    break;
+                case BOULDER:
+                    if (wholeGrid[px + 2][py] == EMPTY) {
+                        wholeGrid[px + 2][py] = BOULDER;
+                        movePlayer(++px, py);
+                    }
+                    break;
+                case '1':
+                case '2':
+                case '3':
+                    movePlayer(++px, py);
+                    addTheTreasure(wholeGrid[px + 1][py]);
+                    break;
+            }
+        } else if (rkey == KeyEvent.VK_UP && py > 1) {
+            switch (wholeGrid[px][py - 1]) {
+                case WALL:
+                    break;
+                case EARTH:
+                case EMPTY:
+                    movePlayer(px, --py);
+                    break;
+                case ROBOT:
+                    gameOver = true;
+                    break;
+                case BOULDER:
+                    if (wholeGrid[px][py - 2] == EMPTY) {
+                        wholeGrid[px][py - 2] = BOULDER;
+                        movePlayer(px, --py);
+                    }
+                    break;
+                case '1':
+                case '2':
+                case '3':
+                    movePlayer(px, --py);
+                    addTheTreasure(wholeGrid[px][py - 1]);
+                    break;
+            }
+        } else if (rkey == KeyEvent.VK_DOWN && py < GAME_FIELD_Y - 2) {
+            switch (wholeGrid[px][py + 1]) {
+                case WALL:
+                    break;
+                case EARTH:
+                case EMPTY:
+                    movePlayer(px, ++py);
+                    break;
+                case ROBOT:
+                    gameOver = true;
+                    break;
+                case BOULDER:
+                    if (wholeGrid[px][py + 2] == EMPTY) {
+                        wholeGrid[px][py + 2] = BOULDER;
+                        movePlayer(px, ++py);
+                    }
+                    break;
+                case '1':
+                case '2':
+                case '3':
+                    movePlayer(px, ++py);
+                    addTheTreasure(wholeGrid[px][py + 1]);
+                    break;
+            }
+        } else if (rkey == KeyEvent.VK_SPACE && player.getTeleportRight() > 0) {
+            player.setTeleportRight(player.getTeleportRight() - 1);
+            cn.getTextWindow().setCursorPosition(72 - String.valueOf(player.getTeleportRight()).length(), 18);
+            cn.getTextWindow().output(String.valueOf(player.getTeleportRight()), TEXT_COLOR);
+            wholeGrid[px][py] = EMPTY;
+            initializePlayer();
+        }
+    }
+
+    private void movePlayer(int px, int py) {
+        backpackImplementation(wholeGrid,backpack,player);
+        wholeGrid[px][py] = PLAYER;    // VK kullanmadan test teknigi
+        wholeGrid[pxOld][pyOld] = EMPTY;
+    }
+
+    //TODO: Add the treasure to the player's BackPack
+    private void addTheTreasure(char theTreasure) {
+        switch (theTreasure) {
+            case '1':
+                break;
+            case '2':
+                break;
+            case '3':
+                break;
+        }
+    }
+
+    private void colorfulPrintGameBoard() {
+        for (int i = 0; i < GAME_FIELD_X; i++) {
+            for (int j = 0; j < GAME_FIELD_Y; j++) {
+                switch (wholeGrid[i][j]) {
+                    case ROBOT:
+                        cn.getTextWindow().output(i, j, ROBOT, ROBOT_COLOR);
+                        break;
+                    case PLAYER:
+                        cn.getTextWindow().output(i, j, PLAYER, PLAYER_COLOR);
+                        break;
+                    case '1':
+                    case '2':
+                    case '3':
+                        cn.getTextWindow().output(i, j, wholeGrid[i][j], TREASURE_COLOR);
+                        break;
+                    case BOULDER:
+                        cn.getTextWindow().output(i, j, BOULDER, BOULDER_COLOR);
+                        break;
+                    case EARTH:
+                        cn.getTextWindow().output(i, j, EARTH, EARTH_COLOR);
+                        break;
+                    case WALL:
+                        cn.getTextWindow().output(i, j, WALL, WALL_COLOR);
+                        break;
+                    default:
+                        cn.getTextWindow().output(i, j, EMPTY, CONSOLE_COLOR);
+                        break;
+                }
+            }
+        }
+    }
+
+    private static void setMenu() {
+        //Input
+        cn.getTextWindow().setCursorPosition(56, 0);
+        cn.getTextWindow().output("Input", TEXT_COLOR);
+        cn.getTextWindow().setCursorPosition(56, 1);
+        cn.getTextWindow().output("<<<<<<<<<<<<<<<", WALL_COLOR);
+        cn.getTextWindow().setCursorPosition(56, 3);
+        cn.getTextWindow().output("<<<<<<<<<<<<<<<", WALL_COLOR);
+
+        //Backpack
+        for (int i = 6; i <= 13; i++) {
+            cn.getTextWindow().output(62, i, '|', TEXT_COLOR);
+            cn.getTextWindow().output(66, i, '|', TEXT_COLOR);
+        }
+        cn.getTextWindow().output(62, 14, '+', TEXT_COLOR);
+        cn.getTextWindow().output(63, 14, '-', TEXT_COLOR);
+        cn.getTextWindow().output(64, 14, '-', TEXT_COLOR);
+        cn.getTextWindow().output(65, 14, '-', TEXT_COLOR);
+        cn.getTextWindow().output(66, 14, '+', TEXT_COLOR);
+        cn.getTextWindow().setCursorPosition(61, 15);
+        cn.getTextWindow().output("Backpack", TEXT_COLOR);
+
+        //Teleport, Score, Time
+        cn.getTextWindow().setCursorPosition(56, 18);
+        cn.getTextWindow().output("Teleport :", TEXT_COLOR);
+        cn.getTextWindow().setCursorPosition(72 - String.valueOf(player.getTeleportRight()).length(), 18);
+        cn.getTextWindow().output(String.valueOf(player.getTeleportRight()), TEXT_COLOR);
+
+        cn.getTextWindow().setCursorPosition(56, 20);
+        cn.getTextWindow().output("Score    :", TEXT_COLOR);
+        cn.getTextWindow().setCursorPosition(72 - String.valueOf(player.getScore()).length(), 20);
+        cn.getTextWindow().output(String.valueOf(player.getScore()), TEXT_COLOR);
+
+        cn.getTextWindow().setCursorPosition(56, 22);
+        cn.getTextWindow().output("Time     :", TEXT_COLOR);
+        cn.getTextWindow().setCursorPosition(72 - String.valueOf(time).length(), 22);
+        cn.getTextWindow().output(String.valueOf(time), TEXT_COLOR);
+    }
+
     private void initializeTreasures() {
-        for(int i = 0; i < TREASURE_COUNT; i++){
-            while (wholeGrid[px][py] != ':') {
+        for (int i = 0; i < TREASURE_COUNT; i++) {
+            while (wholeGrid[px][py] != EARTH) {
                 px = rnd.nextInt(GAME_FIELD_X);
                 py = rnd.nextInt(GAME_FIELD_Y);
             }
@@ -243,32 +333,32 @@ public class GameManager {
         }
     }
 
-    private void initializeEmptySquares(){
-        for(int i = 0; i < EMPTY_SQUARE_COUNT; i++){
-            while (wholeGrid[px][py] != ':') {
+    private void initializeEmptySquares() {
+        for (int i = 0; i < EMPTY_SQUARE_COUNT; i++) {
+            while (wholeGrid[px][py] != EARTH) {
                 px = rnd.nextInt(GAME_FIELD_X);
                 py = rnd.nextInt(GAME_FIELD_Y);
             }
-            wholeGrid[px][py] =' ';
+            wholeGrid[px][py] = EMPTY;
         }
     }
 
     private void initializeRobots() {
         for (int i = 0; i < ROBOT_COUNT; i++) {
-            while (wholeGrid[px][py] != ':') {
+            while (wholeGrid[px][py] != EARTH) {
                 px = rnd.nextInt(GAME_FIELD_X);
                 py = rnd.nextInt(GAME_FIELD_Y);
             }
-            wholeGrid[px][py] = 'X';
+            wholeGrid[px][py] = ROBOT;
         }
     }
 
     private void initializePlayer() {
-        while (wholeGrid[px][py] != ':') {
+        while (wholeGrid[px][py] != EARTH) {
             px = rnd.nextInt(GAME_FIELD_X);
             py = rnd.nextInt(GAME_FIELD_Y);
         }
-        wholeGrid[px][py] = 'P';
+        wholeGrid[px][py] = PLAYER;
     }
 
     private void backpackImplementation(char wholeGrid[][],Stack backPack,Player player){
@@ -337,11 +427,10 @@ public class GameManager {
         for (int i = 0; i < GAME_FIELD_X; i++) {
             for (int j = 0; j < GAME_FIELD_Y; j++) {
                 if (i == 0 || i == 54 || j == 0 || j == 24) {
-                    wholeGrid[i][j] = '#'; // First row of the outer walls
+                    wholeGrid[i][j] = WALL; // First row of the outer walls
                 } else {
-                    wholeGrid[i][j] = ':'; // First row of the outer walls
+                    wholeGrid[i][j] = EARTH; // First row of the outer walls
                 }
-
             }
         }
         //TODO: we need to extract this functionality to initializeBoulders() method
@@ -351,9 +440,9 @@ public class GameManager {
         while (!(counterb == maxconvertBoulder)) {  //TODO !(x == y) is not correct, use x != y instead
             int x = rnd.nextInt(GAME_FIELD_X);
             int y = rnd.nextInt(GAME_FIELD_Y);
-            if (wholeGrid[x][y] == ':' && counterb <= maxconvertBoulder) {
-                wholeGrid[x][y] = ' ';
-                char boulds = 'O';
+            if (wholeGrid[x][y] == EARTH && counterb <= maxconvertBoulder) {
+                wholeGrid[x][y] = EMPTY;
+                char boulds = BOULDER;
                 wholeGrid[x][y] = boulds;
                 counterb++;
             }
