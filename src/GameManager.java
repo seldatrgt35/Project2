@@ -4,6 +4,9 @@ import enigma.console.TextAttributes;
 import enigma.core.Enigma;
 import enigma.event.TextMouseEvent;
 import enigma.event.TextMouseListener;
+import gravity.src.entity.Player;
+import gravity.src.entity.Stack;
+import org.w3c.dom.ls.LSOutput;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -18,6 +21,7 @@ public class GameManager {
     public static final int GAME_FIELD_Y = 25;
     public static final int TREASURE_COUNT = 30;
     public static final int EMPTY_SQUARE_COUNT = 200;
+    public static final int BACKPACK_SIZE = 8;
 
     public static final TextAttributes PLAYER_COLOR = new TextAttributes(GREEN, BLACK);
     public static final TextAttributes ROBOT_COLOR = new TextAttributes(YELLOW, BLACK);
@@ -32,6 +36,9 @@ public class GameManager {
     public int px, py, pxOld, pyOld; // player x,y position
     public boolean moved;
     char[][] wholeGrid = new char[GAME_FIELD_X][GAME_FIELD_Y];
+    Player player=new Player();
+    Stack backpack=new Stack(BACKPACK_SIZE);
+
 
     private static enigma.console.Console cn;
 
@@ -143,6 +150,7 @@ public class GameManager {
         initializePlayer();
 
 
+
         while (true) {
             pxOld = px;
             pyOld = py;
@@ -171,6 +179,8 @@ public class GameManager {
                 }
 
                 if (moved) {
+                    backpackImplementation(wholeGrid,backpack,player);
+
                     wholeGrid[px][py] = 'P';    // VK kullanmadan test teknigi
                     wholeGrid[pxOld][pyOld] = ' ';
                 }
@@ -243,7 +253,6 @@ public class GameManager {
         }
     }
 
-
     private void initializeRobots() {
         for (int i = 0; i < ROBOT_COUNT; i++) {
             while (wholeGrid[px][py] != ':') {
@@ -262,6 +271,67 @@ public class GameManager {
         wholeGrid[px][py] = 'P';
     }
 
+    private void backpackImplementation(char wholeGrid[][],Stack backPack,Player player){
+        keepTrackOfScoreAndTeleportRight(player);
+        if(wholeGrid[px][py]==49||wholeGrid[px][py]==50||wholeGrid[px][py]==51){
+            if(backPack.isFull()){
+                backPack.pop();
+                backPack.push(wholeGrid[px][py]);
+            }else{
+                backPack.push(wholeGrid[px][py]);
+            }
+            printBackpackElementsOnMenu(backpack);
+        }
+    }
+
+    private void keepTrackOfScoreAndTeleportRight(Player player){
+        if(backpack.size()>1){
+            char checkTreasue= (char) backpack.pop();
+            if(checkTreasue==(char) backpack.peek()){
+                backpack.pop();
+
+                int score= player.getScore();
+                int teleportRight= player.getTeleportRight();
+                if(checkTreasue==49){
+                    score+=10;
+                } else if (checkTreasue==50) {
+                    score+=40;
+                }else {
+                    score+=90;
+                    teleportRight+=1;
+                }
+                player.setScore(score);
+                player.setTeleportRight(teleportRight);
+
+                int a= backpack.size();
+                String scoreString= String.valueOf(score);
+                String teleportRightString= String.valueOf(teleportRight);
+                cn.getTextWindow().output(64, 12-a, ' ', TEXT_COLOR);
+                cn.getTextWindow().output(64, 13-a, ' ', TEXT_COLOR);
+                cn.getTextWindow().setCursorPosition(66, 20);
+                cn.getTextWindow().output(scoreString,TEXT_COLOR);
+                cn.getTextWindow().setCursorPosition(66, 18);
+                cn.getTextWindow().output(teleportRightString,TEXT_COLOR);
+            }else {
+                backpack.push(checkTreasue);
+            }
+
+        }
+    }
+
+    private void printBackpackElementsOnMenu(Stack backpack){
+        Stack tempStack=new Stack(8);
+        while(!backpack.isEmpty()){
+            tempStack.push(backpack.pop());
+        }
+        int count=0;
+        while(!tempStack.isEmpty()){
+            char paste= (char) tempStack.peek();
+            cn.getTextWindow().output(64, 13-count, paste, TEXT_COLOR);
+            count++;
+            backpack.push(tempStack.pop());
+        }
+    }
 
     public char[][] initializeWallAndEarth() {
         for (int i = 0; i < GAME_FIELD_X; i++) {
@@ -290,4 +360,5 @@ public class GameManager {
         }
         return wholeGrid;
     }
+
 }
