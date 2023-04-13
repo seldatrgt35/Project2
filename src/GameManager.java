@@ -92,6 +92,7 @@ public class GameManager {
         //2.	All empty squares are converted into earth squares.
         //3.	Random 180 earth squares are converted into boulders.
         //4.	Random 30 earth squares are converted into treasures (Random 1, 2 or 3 with equal probability).
+        initializeBoulders();
         initializeTreasures();
         //5.	Random 200 earth squares are converted into empty squares.
         initializeEmptySquares();
@@ -393,7 +394,7 @@ public class GameManager {
                 String teleportRightString = String.valueOf(teleportRight);
                 cn.getTextWindow().output(64, 12 - a, ' ', TEXT_COLOR);
                 cn.getTextWindow().output(64, 13 - a, ' ', TEXT_COLOR);
-                cn.getTextWindow().setCursorPosition(72-scoreString.length(), 20);
+                cn.getTextWindow().setCursorPosition(72 - scoreString.length(), 20);
                 cn.getTextWindow().output(scoreString, TEXT_COLOR);
                 cn.getTextWindow().setCursorPosition(72 - teleportRightString.length(), 18);
                 cn.getTextWindow().output(teleportRightString, TEXT_COLOR);
@@ -418,24 +419,12 @@ public class GameManager {
         }
     }
 
-    public char[][] initializeWallAndEarth() {
-        for (int i = 0; i < GAME_FIELD_X; i++) {
-            for (int j = 0; j < GAME_FIELD_Y; j++) {
-                if (i == 0 || i == 54 || j == 0 || j == 24) {
-                    wholeGrid[i][j] = WALL; // First row of the outer walls
-                } else {
-                    wholeGrid[i][j] = EARTH; // First row of the outer walls
-                }
-            }
-        }
-        //TODO: we need to extract this functionality to initializeBoulders() method
-//	      Convert boulders 
-        int maxconvertBoulder = 179;    //TODO: Do not use magic numbers, initialize them as constants. Also this one should be 200, change statement accordingly.
+    public char[][] initializeBoulders() {
         int counterb = 0;
-        while (!(counterb == maxconvertBoulder)) {  //TODO !(x == y) is not correct, use x != y instead
+        while (counterb != (EARTH_SQUARES - 1)) {
             int x = rnd.nextInt(GAME_FIELD_X);
             int y = rnd.nextInt(GAME_FIELD_Y);
-            if (wholeGrid[x][y] == EARTH && counterb <= maxconvertBoulder) {
+            if (wholeGrid[x][y] == EARTH && counterb < EARTH_SQUARES) {
                 wholeGrid[x][y] = EMPTY;
                 char boulds = BOULDER;
                 wholeGrid[x][y] = boulds;
@@ -445,4 +434,20 @@ public class GameManager {
         return wholeGrid;
     }
 
+    public char[][] initializeWallAndEarth() {
+        for (int i = 0; i < GAME_FIELD_X; i++) {
+            for (int j = 0; j < GAME_FIELD_Y; j++) {
+                if ((i == 0 || i == 54 || j == 0 || j == 24) || (j == 8 && i >= 0 && i < 50)
+                        || (j == 16 && i >= 5 && i < 54)) {
+
+                    wholeGrid[i][j] = WALL; // First row of the outer walls
+                } else {
+                    wholeGrid[i][j] = EARTH; // First row of the outer walls
+                }
+            }
+        }
+        return wholeGrid;
+
+    }
 }
+

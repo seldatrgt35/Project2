@@ -10,6 +10,7 @@ public class Constant {
     public static final int GAME_FIELD_Y = 25;
     public static final int TREASURE_COUNT = 30;
     public static final int EMPTY_SQUARE_COUNT = 200;
+    public static final int EARTH_SQUARES = 180;
     public static final int FPS = 10;
     public static final int BACKPACK_SIZE = 8;
     public static final int STACK_SIZE = 8;
