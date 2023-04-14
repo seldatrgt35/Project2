@@ -5,6 +5,7 @@ import enigma.event.TextMouseEvent;
 import enigma.event.TextMouseListener;
 import gravity.src.entity.Player;
 import gravity.src.entity.Stack;
+import gravity.src.entity.Queue;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -17,11 +18,13 @@ public class GameManager {
 
     Random rnd = new Random();
     public int px, py, pxOld, pyOld; // player x,y position
+    public int qx, qy, bx, by;
     public boolean gameOver = false;
     char[][] wholeGrid = new char[GAME_FIELD_X][GAME_FIELD_Y];
 
     Stack backpack = new Stack(BACKPACK_SIZE);
 
+    Queue queue = new Queue(QUEUE_SIZE);
     private static int time = 0;
     private static final Player player = new Player(0, new Stack(STACK_SIZE), 3);
 
@@ -100,6 +103,8 @@ public class GameManager {
         initializeRobots();
         //7.	Player P is placed on a random earth square.
         initializePlayer();
+        //Input queue
+        queueJob();
 
         int i = 0;
         while (!gameOver) {
@@ -118,6 +123,9 @@ public class GameManager {
             if (i % FPS == 0) {
                 cn.getTextWindow().setCursorPosition(72 - String.valueOf(++time).length(), 22);
                 cn.getTextWindow().output(String.valueOf(time), TEXT_COLOR);
+            }
+            if(i % FPS_QUEUE == 0){
+                queueJob();
             }
         }
     }
@@ -357,9 +365,56 @@ public class GameManager {
         wholeGrid[px][py] = PLAYER;
     }
 
+
+    private void queueJob(){
+        inputQueue();
+        printQueue();
+        while (wholeGrid[qx][qy] != EARTH && wholeGrid[qx][qy] != EMPTY) {
+            qx = rnd.nextInt(GAME_FIELD_X);
+            qy = rnd.nextInt(GAME_FIELD_Y);
+        }
+        //if the top element is a boulder a random boulder from the game area is conveerted into an earth square
+        if((char)queue.peek()==BOULDER){
+            while(wholeGrid[bx][by] != BOULDER){
+                bx = rnd.nextInt(GAME_FIELD_X);
+                by = rnd.nextInt(GAME_FIELD_Y);
+            }
+            wholeGrid[qx][qy] = EARTH;
+        }
+        wholeGrid[qx][qy] = (char)queue.peek();
+        printQueue();
+        queue.dequeue();
+    }
+    private void printQueue(){
+        for(int i=0; i<QUEUE_SIZE ; i++){
+            char topElement =(char)queue.dequeue();
+            cn.getTextWindow().output((56+i), 2,topElement,TEXT_COLOR);
+            queue.enqueue(topElement);
+        }
+
+    }
+    //Filling the input queue with random game elements if the queue is not full
+    private Queue inputQueue(){
+        while(!queue.isFull()){
+            queue.enqueue(getRandomCharacter());
+        }return queue;
+    }
+
+    private char getRandomCharacter(){
+        int randomPercentage = rnd.nextInt(1,41);
+        int[] percentages = new int[] {6,11,15,16,26,35,40}; // cumulative percentages
+        char[] characters = new char[] {TREASURE_1,TREASURE_2,TREASURE_3, ROBOT, BOULDER, EARTH, EMPTY};
+        for(int i = 0; i< percentages.length; i++){
+            if (randomPercentage < percentages[i]){
+                return characters[i];
+            }
+        }
+        return 0;
+    }
+
     private void backpackImplementation(char wholeGrid[][], Stack backPack, Player player) {
         keepTrackOfScoreAndTeleportRight(player);
-        if (wholeGrid[px][py] == 49 || wholeGrid[px][py] == 50 || wholeGrid[px][py] == 51) {
+        if (wholeGrid[px][py] == TREASURE_1 || wholeGrid[px][py] == TREASURE_2 || wholeGrid[px][py] == TREASURE_3) {
             if (backPack.isFull()) {
                 backPack.pop();
                 backPack.push(wholeGrid[px][py]);
@@ -378,9 +433,9 @@ public class GameManager {
 
                 int score = player.getScore();
                 int teleportRight = player.getTeleportRight();
-                if (checkTreasue == 49) {
+                if (checkTreasue == TREASURE_1) {
                     score += 10;
-                } else if (checkTreasue == 50) {
+                } else if (checkTreasue == TREASURE_2) {
                     score += 40;
                 } else {
                     score += 90;
