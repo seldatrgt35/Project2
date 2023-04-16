@@ -4,8 +4,8 @@ import enigma.core.Enigma;
 import enigma.event.TextMouseEvent;
 import enigma.event.TextMouseListener;
 import gravity.src.entity.Player;
-import gravity.src.entity.Stack;
 import gravity.src.entity.Queue;
+import gravity.src.entity.Stack;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -105,13 +105,13 @@ public class GameManager {
         initializePlayer();
         //Input queue
         queueJob();
-
         int i = 0;
         while (!gameOver) {
             i++;
             pxOld = px;
             pyOld = py;
             gameOver = false;
+            boulderFall();
             if (keypr == 1) { // if keyboard button pressed
                 handleKey(rkey);
                 keypr = 0; // last action
@@ -124,7 +124,7 @@ public class GameManager {
                 cn.getTextWindow().setCursorPosition(72 - String.valueOf(++time).length(), 22);
                 cn.getTextWindow().output(String.valueOf(time), TEXT_COLOR);
             }
-            if(i % FPS_QUEUE == 0){
+            if (i % FPS_QUEUE == 0) {
                 queueJob();
             }
         }
@@ -137,6 +137,9 @@ public class GameManager {
                     break;
                 case EARTH:
                 case EMPTY:
+                case '1':
+                case '2':
+                case '3':
                     movePlayer(--px, py);
                     break;
                 case ROBOT:
@@ -148,12 +151,6 @@ public class GameManager {
                         movePlayer(--px, py);
                     }
                     break;
-                case '1':
-                case '2':
-                case '3':
-                    movePlayer(--px, py);
-                    addTheTreasure(wholeGrid[px - 1][py]);
-                    break;
             }
         } else if (rkey == KeyEvent.VK_RIGHT && px < GAME_FIELD_X - 2) {
             switch (wholeGrid[px + 1][py]) {
@@ -161,6 +158,9 @@ public class GameManager {
                     break;
                 case EARTH:
                 case EMPTY:
+                case '1':
+                case '2':
+                case '3':
                     movePlayer(++px, py);
                     break;
                 case ROBOT:
@@ -172,12 +172,6 @@ public class GameManager {
                         movePlayer(++px, py);
                     }
                     break;
-                case '1':
-                case '2':
-                case '3':
-                    movePlayer(++px, py);
-                    addTheTreasure(wholeGrid[px + 1][py]);
-                    break;
             }
         } else if (rkey == KeyEvent.VK_UP && py > 1) {
             switch (wholeGrid[px][py - 1]) {
@@ -185,6 +179,9 @@ public class GameManager {
                     break;
                 case EARTH:
                 case EMPTY:
+                case '1':
+                case '2':
+                case '3':
                     movePlayer(px, --py);
                     break;
                 case ROBOT:
@@ -196,12 +193,6 @@ public class GameManager {
                         movePlayer(px, --py);
                     }
                     break;
-                case '1':
-                case '2':
-                case '3':
-                    movePlayer(px, --py);
-                    addTheTreasure(wholeGrid[px][py - 1]);
-                    break;
             }
         } else if (rkey == KeyEvent.VK_DOWN && py < GAME_FIELD_Y - 2) {
             switch (wholeGrid[px][py + 1]) {
@@ -209,6 +200,9 @@ public class GameManager {
                     break;
                 case EARTH:
                 case EMPTY:
+                case '1':
+                case '2':
+                case '3':
                     movePlayer(px, ++py);
                     break;
                 case ROBOT:
@@ -219,12 +213,6 @@ public class GameManager {
                         wholeGrid[px][py + 2] = BOULDER;
                         movePlayer(px, ++py);
                     }
-                    break;
-                case '1':
-                case '2':
-                case '3':
-                    movePlayer(px, ++py);
-                    addTheTreasure(wholeGrid[px][py + 1]);
                     break;
             }
         } else if (rkey == KeyEvent.VK_SPACE && player.getTeleportRight() > 0) {
@@ -237,21 +225,9 @@ public class GameManager {
     }
 
     private void movePlayer(int px, int py) {
-        backpackImplementation(wholeGrid, backpack, player);
+        backpackImplementation(backpack);
         wholeGrid[px][py] = PLAYER;    // VK kullanmadan test teknigi
         wholeGrid[pxOld][pyOld] = EMPTY;
-    }
-
-    //TODO: Add the treasure to the player's BackPack
-    private void addTheTreasure(char theTreasure) {
-        switch (theTreasure) {
-            case '1':
-                break;
-            case '2':
-                break;
-            case '3':
-                break;
-        }
     }
 
     private void colorfulPrintGameBoard() {
@@ -366,7 +342,7 @@ public class GameManager {
     }
 
 
-    private void queueJob(){
+    private void queueJob() {
         inputQueue();
         printQueue();
         while (wholeGrid[qx][qy] != EARTH && wholeGrid[qx][qy] != EMPTY) {
@@ -374,46 +350,49 @@ public class GameManager {
             qy = rnd.nextInt(GAME_FIELD_Y);
         }
         //if the top element is a boulder a random boulder from the game area is conveerted into an earth square
-        if((char)queue.peek()==BOULDER){
-            while(wholeGrid[bx][by] != BOULDER){
+        if ((char) queue.peek() == BOULDER) {
+            while (wholeGrid[bx][by] != BOULDER) {
                 bx = rnd.nextInt(GAME_FIELD_X);
                 by = rnd.nextInt(GAME_FIELD_Y);
             }
             wholeGrid[qx][qy] = EARTH;
         }
-        wholeGrid[qx][qy] = (char)queue.peek();
+        wholeGrid[qx][qy] = (char) queue.peek();
         printQueue();
         queue.dequeue();
     }
-    private void printQueue(){
-        for(int i=0; i<QUEUE_SIZE ; i++){
-            char topElement =(char)queue.dequeue();
-            cn.getTextWindow().output((56+i), 2,topElement,TEXT_COLOR);
+
+    private void printQueue() {
+        for (int i = 0; i < QUEUE_SIZE; i++) {
+            char topElement = (char) queue.dequeue();
+            cn.getTextWindow().output((56 + i), 2, topElement, TEXT_COLOR);
             queue.enqueue(topElement);
         }
 
     }
+
     //Filling the input queue with random game elements if the queue is not full
-    private Queue inputQueue(){
-        while(!queue.isFull()){
+    private Queue inputQueue() {
+        while (!queue.isFull()) {
             queue.enqueue(getRandomCharacter());
-        }return queue;
+        }
+        return queue;
     }
 
-    private char getRandomCharacter(){
-        int randomPercentage = rnd.nextInt(1,41);
-        int[] percentages = new int[] {6,11,15,16,26,35,40}; // cumulative percentages
-        char[] characters = new char[] {TREASURE_1,TREASURE_2,TREASURE_3, ROBOT, BOULDER, EARTH, EMPTY};
-        for(int i = 0; i< percentages.length; i++){
-            if (randomPercentage < percentages[i]){
+    private char getRandomCharacter() {
+        int randomPercentage = rnd.nextInt(41);
+        int[] percentages = new int[]{6, 11, 15, 16, 26, 35, 40}; // cumulative percentages
+        char[] characters = new char[]{TREASURE_1, TREASURE_2, TREASURE_3, ROBOT, BOULDER, EARTH, EMPTY};
+        for (int i = 0; i < percentages.length; i++) {
+            if (randomPercentage < percentages[i]) {
                 return characters[i];
             }
         }
         return 0;
     }
 
-    private void backpackImplementation(char wholeGrid[][], Stack backPack, Player player) {
-        keepTrackOfScoreAndTeleportRight(player);
+    private void backpackImplementation(Stack backPack) {
+        keepTrackOfScoreAndTeleportRight();
         if (wholeGrid[px][py] == TREASURE_1 || wholeGrid[px][py] == TREASURE_2 || wholeGrid[px][py] == TREASURE_3) {
             if (backPack.isFull()) {
                 backPack.pop();
@@ -425,17 +404,17 @@ public class GameManager {
         }
     }
 
-    private void keepTrackOfScoreAndTeleportRight(Player player) {
+    private void keepTrackOfScoreAndTeleportRight() {
         if (backpack.size() > 1) {
-            char checkTreasue = (char) backpack.pop();
-            if (checkTreasue == (char) backpack.peek()) {
+            char checkTreasure = (char) backpack.pop();
+            if (checkTreasure == (char) backpack.peek()) {
                 backpack.pop();
 
                 int score = player.getScore();
                 int teleportRight = player.getTeleportRight();
-                if (checkTreasue == TREASURE_1) {
+                if (checkTreasure == TREASURE_1) {
                     score += 10;
-                } else if (checkTreasue == TREASURE_2) {
+                } else if (checkTreasure == TREASURE_2) {
                     score += 40;
                 } else {
                     score += 90;
@@ -454,7 +433,7 @@ public class GameManager {
                 cn.getTextWindow().setCursorPosition(72 - teleportRightString.length(), 18);
                 cn.getTextWindow().output(teleportRightString, TEXT_COLOR);
             } else {
-                backpack.push(checkTreasue);
+                backpack.push(checkTreasure);
             }
 
         }
@@ -474,35 +453,64 @@ public class GameManager {
         }
     }
 
-    public char[][] initializeBoulders() {
+    public void initializeBoulders() {
         int counterb = 0;
         while (counterb != (EARTH_SQUARES - 1)) {
             int x = rnd.nextInt(GAME_FIELD_X);
             int y = rnd.nextInt(GAME_FIELD_Y);
             if (wholeGrid[x][y] == EARTH && counterb < EARTH_SQUARES) {
-                wholeGrid[x][y] = EMPTY;
-                char boulds = BOULDER;
-                wholeGrid[x][y] = boulds;
+                wholeGrid[x][y] = BOULDER;
                 counterb++;
             }
         }
-        return wholeGrid;
     }
 
-    public char[][] initializeWallAndEarth() {
+    public void initializeWallAndEarth() {
         for (int i = 0; i < GAME_FIELD_X; i++) {
             for (int j = 0; j < GAME_FIELD_Y; j++) {
-                if ((i == 0 || i == 54 || j == 0 || j == 24) || (j == 8 && i >= 0 && i < 50)
-                        || (j == 16 && i >= 5 && i < 54)) {
-
+                if ((i == 0 || i == 54 || j == 0 || j == 24) ||
+                        (j == 8 && i < 50) ||
+                        (j == 16 && i >= 5)) {
                     wholeGrid[i][j] = WALL; // First row of the outer walls
                 } else {
                     wholeGrid[i][j] = EARTH; // First row of the outer walls
                 }
             }
         }
-        return wholeGrid;
+    }
+//    •	For a boulder;
+//    o	If there is an empty square under it, it falls (a).
+//    o	If a boulder is on top of another boulder, and side squares are empty; the upper boulder does a side fall (b).
+//            •	Player can go to the square under a static boulder without any harm (c).
+//            But if the player goes down from there, he/she cannot escape from a falling boulder just over himself/herself (d).
 
+    private void boulderFall() {
+        for (int i = 0; i < GAME_FIELD_X; i++) {
+            for (int j = GAME_FIELD_Y - 1; j >= 0; j--) {
+                if (wholeGrid[i][j] == BOULDER) {
+                    if (wholeGrid[i][j + 1] == EMPTY) {
+                        wholeGrid[i][j + 1] = BOULDER;
+                        wholeGrid[i][j] = EMPTY;
+                        if (wholeGrid[i][j + 2] == PLAYER) {
+                            gameOver = true;
+                        }
+                    } else if (wholeGrid[i][j + 1] == BOULDER && wholeGrid[i + 1][j+1] == EMPTY) {
+                        wholeGrid[i + 1][j+1] = BOULDER;
+                        wholeGrid[i][j] = EMPTY;
+                        if (wholeGrid[i + 1][j + 2] == PLAYER) {
+                            gameOver = true;
+                        }
+                    } else if (wholeGrid[i][j + 1] == BOULDER && wholeGrid[i - 1][j+1] == EMPTY) {
+                        wholeGrid[i - 1][j+1] = BOULDER;
+                        wholeGrid[i][j] = EMPTY;
+                        if (wholeGrid[i - 1][j + 2] == PLAYER) {
+                            gameOver = true;
+                        }
+                    }
+
+                }
+            }
+        }
     }
 }
 
