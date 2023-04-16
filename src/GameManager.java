@@ -128,6 +128,13 @@ public class GameManager {
                 queueJob();
             }
         }
+        //TODO: Game over yazisi
+        //Ekranin ortasina Game Over yazisi yazilir.
+        //Oyuncu kazandiysa You win! yazisi
+        //Arka plandaki tum board karartilabilir.
+        //Oyuncunun score u yazilir
+        //Menu butonu eklenebilir.
+
     }
 
     private void handleKey(int rkey) {
@@ -409,7 +416,6 @@ public class GameManager {
             char checkTreasure = (char) backpack.pop();
             if (checkTreasure == (char) backpack.peek()) {
                 backpack.pop();
-
                 int score = player.getScore();
                 int teleportRight = player.getTeleportRight();
                 if (checkTreasure == TREASURE_1) {
@@ -485,6 +491,7 @@ public class GameManager {
 //            But if the player goes down from there, he/she cannot escape from a falling boulder just over himself/herself (d).
 
     private void boulderFall() {
+        int score = player.getScore();
         for (int i = 0; i < GAME_FIELD_X; i++) {
             for (int j = GAME_FIELD_Y - 1; j >= 0; j--) {
                 if (wholeGrid[i][j] == BOULDER) {
@@ -493,22 +500,36 @@ public class GameManager {
                         wholeGrid[i][j] = EMPTY;
                         if (wholeGrid[i][j + 2] == PLAYER) {
                             gameOver = true;
+                        } else if (wholeGrid[i][j + 2] == ROBOT) {
+                            score += 900;
+                            wholeGrid[i][j + 2] = EMPTY;
                         }
-                    } else if (wholeGrid[i][j + 1] == BOULDER && wholeGrid[i + 1][j+1] == EMPTY) {
-                        wholeGrid[i + 1][j+1] = BOULDER;
+                    } else if (wholeGrid[i][j + 1] == BOULDER && wholeGrid[i + 1][j + 1] == EMPTY) {
+                        wholeGrid[i + 1][j + 1] = BOULDER;
                         wholeGrid[i][j] = EMPTY;
                         if (wholeGrid[i + 1][j + 2] == PLAYER) {
                             gameOver = true;
+                        } else if (wholeGrid[i + 1][j + 2] == ROBOT) {
+                            score += 900;
+                            wholeGrid[i + 1][j + 2] = EMPTY;
                         }
-                    } else if (wholeGrid[i][j + 1] == BOULDER && wholeGrid[i - 1][j+1] == EMPTY) {
-                        wholeGrid[i - 1][j+1] = BOULDER;
+                    } else if (wholeGrid[i][j + 1] == BOULDER && wholeGrid[i - 1][j + 1] == EMPTY) {
+                        wholeGrid[i - 1][j + 1] = BOULDER;
                         wholeGrid[i][j] = EMPTY;
                         if (wholeGrid[i - 1][j + 2] == PLAYER) {
                             gameOver = true;
+                        } else if (wholeGrid[i - 1][j + 2] == ROBOT) {
+                            score += 900;
+                            wholeGrid[i - 1][j + 2] = EMPTY;
                         }
-                    }
 
+                    }
                 }
+                player.setScore(score);
+                String scoreString = String.valueOf(score);
+                cn.getTextWindow().setCursorPosition(72 - scoreString.length(), 20);
+                cn.getTextWindow().output(scoreString, TEXT_COLOR);
+
             }
         }
     }
